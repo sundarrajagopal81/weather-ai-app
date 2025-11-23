@@ -196,6 +196,57 @@ weather-ai-app/
 6. **LLM Response** → `llm_client.py` calls local Ollama server
 7. **Output** → Displays weather data + AI explanation
 
+### Sequence Diagram
+
+```
+User          CLI/Web UI      ai_agent      weather_client    Open-Meteo API    llm_client      Ollama
+ │                │               │               │                  │               │              │
+ │  Enter City    │               │               │                  │               │              │
+ ├───────────────>│               │               │                  │               │              │
+ │                │               │               │                  │               │              │
+ │                │  get_weather()│               │                  │               │              │
+ │                ├──────────────>│               │                  │               │              │
+ │                │               │               │                  │               │              │
+ │                │               │  Geocoding    │                  │               │              │
+ │                │               ├──────────────>│                  │               │              │
+ │                │               │               │  GET /v1/search  │               │              │
+ │                │               │               ├─────────────────>│               │              │
+ │                │               │               │  Coordinates     │               │              │
+ │                │               │               │<─────────────────│               │              │
+ │                │               │               │                  │               │              │
+ │                │               │  Weather      │                  │               │              │
+ │                │               ├──────────────>│                  │               │              │
+ │                │               │               │  GET /v1/forecast│               │              │
+ │                │               │               ├─────────────────>│               │              │
+ │                │               │               │  Weather Data    │               │              │
+ │                │               │               │<─────────────────│               │              │
+ │                │               │               │                  │               │              │
+ │                │  weather_data │               │                  │               │              │
+ │                │<──────────────│               │                  │               │              │
+ │                │               │               │                  │               │              │
+ │                │  generate_    │               │                  │               │              │
+ │                │  explanation()│               │                  │               │              │
+ │                ├──────────────>│               │                  │               │              │
+ │                │               │               │                  │               │              │
+ │                │               │  generate_    │                  │               │              │
+ │                │               │  chat_response│                  │               │              │
+ │                │               ├──────────────────────────────────>│               │              │
+ │                │               │               │                  │  POST /api/   │              │
+ │                │               │               │                  │  chat         │              │
+ │                │               │               │                  ├───────────────>│              │
+ │                │               │               │                  │               │  Process     │
+ │                │               │               │                  │               │<─────────────│
+ │                │               │               │                  │  AI Response  │              │
+ │                │               │               │                  │<───────────────│              │
+ │                │               │               │                  │               │              │
+ │                │  explanation  │               │                  │               │              │
+ │                │<──────────────│               │                  │               │              │
+ │                │               │               │                  │               │              │
+ │  Display       │               │               │                  │               │              │
+ │<───────────────│               │               │                  │               │              │
+ │                │               │               │                  │               │              │
+```
+
 ## How It Works
 
 1. **Location Resolution**: User enters a city name → Geocoding API resolves to coordinates
