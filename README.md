@@ -148,6 +148,54 @@ weather-ai-app/
 └── ARCHITECTURE_DIAGRAM.md   # Architecture overview
 ```
 
+## Architecture
+
+### High-Level Architecture
+
+```
+┌─────────────┐
+│   User      │
+│  (CLI/Web)  │
+└──────┬──────┘
+       │
+       ├─────────────────┐
+       │                 │
+┌──────▼──────┐   ┌──────▼──────┐
+│  main.py    │   │streamlit_   │
+│  (CLI)      │   │app.py (Web) │
+└──────┬──────┘   └──────┬──────┘
+       │                 │
+       └────────┬────────┘
+                │
+       ┌────────▼────────┐
+       │  ai_agent.py    │
+       │  (Orchestrator) │
+       └────────┬────────┘
+                │
+       ┌────────┴────────┐
+       │                 │
+┌──────▼──────┐   ┌──────▼──────┐
+│ weather_    │   │  llm_       │
+│ client.py   │   │ client.py   │
+└──────┬──────┘   └──────┬──────┘
+       │                 │
+       │                 │
+┌──────▼──────┐   ┌──────▼──────┐
+│ Open-Meteo  │   │  Ollama     │
+│   API       │   │  (Local LLM)│
+└─────────────┘   └─────────────┘
+```
+
+### Data Flow
+
+1. **User Input** → City name entered via CLI or web UI
+2. **Weather Fetch** → `weather_client.py` calls Open-Meteo geocoding API
+3. **Location Resolution** → Gets coordinates, city, state, country
+4. **Weather Data** → Fetches current weather (temperature, humidity, condition)
+5. **AI Processing** → `ai_agent.py` formats data and sends to LLM
+6. **LLM Response** → `llm_client.py` calls local Ollama server
+7. **Output** → Displays weather data + AI explanation
+
 ## How It Works
 
 1. **Location Resolution**: User enters a city name → Geocoding API resolves to coordinates
